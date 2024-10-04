@@ -53,10 +53,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      # Paso 7: Construir la imagen Docker
+      # Step 7: Build the Docker image
       - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:latest .
+          docker build --build-arg GPR_USER=${{ secrets.GPR_USER }} --build-arg GPR_TOKEN=${{ secrets.GPR_TOKEN }} -t ghcr.io/${{ github.repository }}:latest .
 
       # Paso 8: Push de la imagen Docker a GHCR
       - name: Push Docker Image
