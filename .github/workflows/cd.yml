@@ -36,7 +36,7 @@ jobs:
       - name: Set up GitHub Packages credentials
         run: |
           echo "gpr.user=${{ secrets.GPR_USER }}" >> $GITHUB_ENV
-          echo "gpr.token=${{ secrets.DOCKER_TOkEN }}" >> $GITHUB_ENV
+          echo "gpr.token=${{ secrets.DOCKER_TOKEN }}" >> $GITHUB_ENV
 
       # Paso 5: Construir el proyecto con Gradle
       - name: Build Gradle
