@@ -1,10 +1,14 @@
 package printscript_service.utils;
 
+import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;
+import runner.FormatterRunner;
+import runner.LinterRunner;
 import runner.Runner;
-
+import runner.ValidationRunner;
 import java.io.FileInputStream;
 import java.io.IOException;
+
 
 public class PrintScript implements Language {
 
@@ -22,16 +26,37 @@ public class PrintScript implements Language {
 
     @Override
     public String compile(String code, String version) {
-        return "";
+      ValidationRunner runner = new ValidationRunner();
+      try {
+        runner.validate(new FileInputStream(code), version);
+      } catch (Exception e) {
+        return e.getMessage();
+      }
+      return "Success";
     }
 
     @Override
-    public String analyze(String code, String version) {
-        return "";
+    public String analyze(String code, String rules, String version) {
+      LinterRunner runner = new LinterRunner();
+      try {
+        runner.linterRun(new FileInputStream(code), new FileInputStream(rules), version);
+      } catch (Exception e) {
+        return e.getMessage();
+      }
+      return "Success";
     }
 
     @Override
-    public String format(String code, String version) {
-        return "";
+    public String format(String code, String rules, String outputPath, String version) {
+      try {
+        FormatterRunner runner = new FormatterRunner();
+        FileInputStream codeStream = new FileInputStream(code);
+        FileWriter fileWriter = new FileWriter(outputPath);
+        runner.format(new FileInputStream(code), codeStream, fileWriter, version);
+      } catch (Exception e) {
+        return e.getMessage();
+      }
+      return "Success";
     }
+
 }
