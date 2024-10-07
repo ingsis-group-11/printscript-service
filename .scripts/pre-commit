@@ -1,25 +1,12 @@
 #!/bin/bash
 
 echo "*********************************************************"
-echo "Running git pre-commit hook. Running tests... "
-echo "*********************************************************"
-
-# Run tests and capture the exit code
-./gradlew test
-status=$?
-
-if [ "$status" -ne 0 ]; then
-    echo "*********************************************************"
-    echo "       ********************************************      "
-    echo 1>&2 "Tests failed. Fix the issues before committing."
-    echo "       ********************************************      "
-    echo "*********************************************************"
-    exit 1
-fi
-
-echo "*********************************************************"
 echo "Running Spotless Apply... "
 echo "*********************************************************"
+
+# Change to the root directory of the project
+# shellcheck disable=SC2164
+cd "$(dirname "$0")/.."
 
 # Run Spotless apply
 ./gradlew spotlessApply
