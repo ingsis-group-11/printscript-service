@@ -64,6 +64,7 @@ jobs:
             echo "TAG=dev" >> $GITHUB_ENV
           else
             echo "TAG=other" >> $GITHUB_ENV
+          fi
 
       # Paso 8: Construir la imagen Docker con la etiqueta correspondiente
       - name: Build Docker Image
