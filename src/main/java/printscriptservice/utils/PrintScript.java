@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+
+import org.springframework.web.multipart.MultipartFile;
 import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;
 import runner.FormatterRunner;
@@ -16,13 +18,13 @@ import runner.ValidationRunner;
 public class PrintScript implements Language {
 
   @Override
-  public String execute(String code, String version) throws IOException {
+  public String execute(MultipartFile code, String version) throws IOException {
     if (version == null) {
       version = "1.1";
     }
     Runner runner = new Runner();
     TestPrintProvider testPrintProvider = new TestPrintProvider();
-    InputStream inputStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    InputStream inputStream = code.getInputStream();
     runner.run(inputStream, version, testPrintProvider);
     StringBuilder output = new StringBuilder();
     Iterator<String> messages = testPrintProvider.getMessages();
