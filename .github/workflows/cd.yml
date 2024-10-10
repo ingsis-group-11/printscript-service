@@ -47,7 +47,7 @@ jobs:
       # Paso 6: Construir la imagen Docker
       - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:latest .
+          docker build -t ghcr.io/${{ github.repository }}:latest
 
       # Paso 7: Push de la imagen Docker a GHCR
       - name: Push Docker Image
