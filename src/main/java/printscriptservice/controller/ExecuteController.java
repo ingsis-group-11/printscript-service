@@ -1,8 +1,10 @@
 package printscriptservice.controller;
 
 import java.io.IOException;
-
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import printscriptservice.service.ExecuteService;
 
@@ -16,11 +18,11 @@ public class ExecuteController {
   }
 
   @PostMapping()
-  public String execute (
+  public String execute(
       @RequestParam("code") MultipartFile code,
       @RequestParam("language") String language,
-      @RequestParam("version") String version
-  ) throws IOException {
+      @RequestParam("version") String version)
+      throws IOException {
     return executeService.execute(language, code, version);
   }
 }
