@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.6'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'checkstyle'
 }
 
 group = 'printscript-service'
@@ -11,6 +13,15 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
 	}
+}
+
+allprojects {
+    apply plugin: 'checkstyle'
+    checkstyle {
+        toolVersion = '10.18.0'
+        configFile = file("${rootProject.projectDir}/config/checkstyle/google_checks.xml")
+        maxWarnings = 0
+    }
 }
 
 configurations {
@@ -35,11 +46,15 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'io.github.cdimascio:dotenv-java:2.2.0'
 
 	//PrintScript dependencies
 	implementation 'printScript:lexer:1.1-SNAPSHOT'
@@ -57,6 +72,17 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.named('build') {
+    dependsOn 'spotlessApply'
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+        target 'src/**/*.java'
+    }
 }
 
 /*

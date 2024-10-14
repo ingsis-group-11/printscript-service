@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'printScript-service.printScript' is invalid and this project uses 'printscript_service.printScript' instead.
+* The original package name 'printScript-service.printScript' is invalid and this project uses 'printscriptservice.printScript' instead.
 
 # Getting Started
 
