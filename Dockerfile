@@ -3,11 +3,11 @@ FROM gradle:8.10.1-jdk21 AS build
 
 # Set build arguments for GitHub Packages credentials
 ARG GPR_USER
-ARG DOCKER_TOKEN
+ARG GPR_TOKEN
 
 # Set environment variables for Gradle
 ENV USERNAME=$GPR_USER
-ENV TOKEN=$DOCKER_TOKEN
+ENV TOKEN=$GPR_TOKEN
 
 # Copy the project files to the build image
 COPY . /home/gradle/src

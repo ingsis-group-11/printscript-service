@@ -6,7 +6,7 @@ plugins {
     id 'checkstyle'
 }
 
-group = 'printScript-service'
+group = 'printscript-service'
 version = '0.0.1-SNAPSHOT'
 
 java {

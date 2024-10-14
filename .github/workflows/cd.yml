@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev  # Agregamos la rama dev
 
 jobs:
   build-and-push:
@@ -36,13 +37,13 @@ jobs:
       - name: Set up GitHub Packages credentials
         run: |
           echo "gpr.user=${{ secrets.GPR_USER }}" >> $GITHUB_ENV
-          echo "gpr.token=${{ secrets.DOCKER_TOKEN }}" >> $GITHUB_ENV
+          echo "gpr.key=${{ secrets.DOCKER_TOKEN }}" >> $GITHUB_ENV
 
       # Paso 5: Construir el proyecto con Gradle
       - name: Build Gradle
         env:
-          USERNAME : ${{ secrets.GPR_USER }}
-          TOKEN : ${{ secrets.DOCKER_TOKEN }}
+          USERNAME: ${{ secrets.GPR_USER }}
+          TOKEN: ${{ secrets.DOCKER_TOKEN }}
         run: gradle assemble --no-daemon
 
       # Paso 6: Iniciar sesión en GitHub Container Registry
@@ -53,12 +54,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      # Step 7: Build the Docker image
+      # Paso 7: Establecer el tag de la imagen según la rama
+      - name: Set Docker Image Tag
+        id: get-tag
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "TAG=latest" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+            echo "TAG=dev" >> $GITHUB_ENV
+          else
+            echo "TAG=other" >> $GITHUB_ENV
+          fi
+
+      # Paso 8: Construir la imagen Docker con la etiqueta correspondiente
       - name: Build Docker Image
         run: |
-          docker build --build-arg GPR_USER=${{ secrets.GPR_USER }} --build-arg GPR_TOKEN=${{ secrets.DOCKER_TOKEN }} -t ghcr.io/${{ github.repository }}:latest .
+          docker build --build-arg GPR_USER=${{ secrets.GPR_USER }} --build-arg GPR_TOKEN=${{ secrets.DOCKER_TOKEN }} -t ghcr.io/${{ github.repository }}:${{ env.TAG }} .
 
-      # Paso 8: Push de la imagen Docker a GHCR
+      # Paso 9: Push de la imagen Docker a GHCR
       - name: Push Docker Image
         run: |
-          docker push ghcr.io/${{ github.repository }}:latest
+          docker push ghcr.io/${{ github.repository }}:${{ env.TAG }}
