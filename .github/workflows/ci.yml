@@ -22,8 +22,10 @@ jobs:
 
       - name: Build with Gradle
         env:
-            USERNAME: ${{ secrets.GPR_USERNAME }}
-            TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          USERNAME: ${{ secrets.GPR_USERNAME }}
+          TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+          AUTH_SERVER_URI: ${{ secrets.AUTH_SERVER_URI }}
         run: ./gradlew build
 
       - name: Run linting
@@ -31,4 +33,3 @@ jobs:
 
       - name: Check formatter
         run: ./gradlew spotlessCheck
-
