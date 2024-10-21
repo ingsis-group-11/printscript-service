@@ -53,8 +53,8 @@ jobs:
             echo "TAG=other" >> $GITHUB_ENV
           fi
 
-      # Paso 7: Construir la imagen Docker con los secretos
-      - name: Build Docker Image
+      # Paso 6: Construir la imagen Docker con los secretos
+      - name: Build And Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: .
