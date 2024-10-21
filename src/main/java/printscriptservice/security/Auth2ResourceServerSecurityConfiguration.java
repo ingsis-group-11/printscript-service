@@ -19,7 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class OAuth2ResourceServerSecurityConfiguration {
+public class Auth2ResourceServerSecurityConfiguration {
 
   @Value("${auth0.audience}")
   private String audience;

@@ -21,6 +21,10 @@ snippet:
   manager:
     url: ${SNIPPET_MANAGER_URL:http://localhost:8000}
 
+asset:
+  manager:
+    url: ${ASSET_MANAGER_URL:http://localhost:8080}
+
 auth0:
   audience: ${AUTH0_AUDIENCE}
 
