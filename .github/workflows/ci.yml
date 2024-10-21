@@ -21,6 +21,9 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Gradle
+        env:
+            USERNAME: ${{ secrets.GPR_USERNAME }}
+            TOKEN: ${{ secrets.DOCKER_TOKEN }}
         run: ./gradlew build
 
       - name: Run tests
