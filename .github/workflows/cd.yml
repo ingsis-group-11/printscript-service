@@ -53,16 +53,27 @@ jobs:
             echo "TAG=other" >> $GITHUB_ENV
           fi
 
-      # Paso 6: Construir la imagen Docker con los secretos
+      # Paso 6: Crear los archivos secretos temporales
+      - name: Create Secrets Files
+        run: |
+          echo "${{ secrets.GPR_USER }}" > gpr_user.txt
+          echo "${{ secrets.GPR_TOKEN }}" > gpr_token.txt
+
+      # Paso 7: Construir la imagen Docker con los secretos
       - name: Build Docker Image
         env:
           DOCKER_BUILDKIT: 1
         run: |
-          docker build --secret id=gpr_user,src=/run/secrets/gpr_user \
-                       --secret id=gpr_token,src=/run/secrets/gpr_token \
+          docker build --secret id=gpr_user,src=gpr_user.txt \
+                       --secret id=gpr_token,src=gpr_token.txt \
                        -t ghcr.io/${{ github.repository }}:${{ env.TAG }} .
 
-      # Paso 7: Push de la imagen Docker a GHCR
+      # Paso 8: Push de la imagen Docker a GHCR
       - name: Push Docker Image
         run: |
           docker push ghcr.io/${{ github.repository }}:${{ env.TAG }}
+
+      # Paso 9: Limpiar los archivos secretos
+      - name: Clean up Secrets
+        run: |
+          rm -f gpr_user.txt gpr_token.txt
