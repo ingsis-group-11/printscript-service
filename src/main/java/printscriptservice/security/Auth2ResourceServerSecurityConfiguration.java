@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -18,7 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class OAuth2ResourceServerSecurityConfiguration {
+public class Auth2ResourceServerSecurityConfiguration {
 
   @Value("${auth0.audience}")
   private String audience;
@@ -42,8 +43,8 @@ public class OAuth2ResourceServerSecurityConfiguration {
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
-        .cors(cors -> cors.disable())
-        .csrf(csrf -> csrf.disable());
+        .cors(AbstractHttpConfigurer::disable)
+        .csrf(AbstractHttpConfigurer::disable);
     return http.build();
   }
 

@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - dev  # Agregamos la rama dev
+      - dev
 
 jobs:
   build-and-push:
@@ -33,20 +33,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # Paso 4: Configurar credenciales para GitHub Packages
-      - name: Set up GitHub Packages credentials
-        run: |
-          echo "gpr.user=${{ secrets.GPR_USER }}" >> $GITHUB_ENV
-          echo "gpr.key=${{ secrets.DOCKER_TOKEN }}" >> $GITHUB_ENV
-
-      # Paso 5: Construir el proyecto con Gradle
-      - name: Build Gradle
-        env:
-          USERNAME: ${{ secrets.GPR_USER }}
-          TOKEN: ${{ secrets.DOCKER_TOKEN }}
-        run: gradle assemble --no-daemon
-
-      # Paso 6: Iniciar sesión en GitHub Container Registry
+      # Paso 4: Iniciar sesión en GitHub Container Registry
       - name: Login GHCR
         uses: docker/login-action@v2
         with:
@@ -54,7 +41,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      # Paso 7: Establecer el tag de la imagen según la rama
+      # Paso 5: Establecer el tag de la imagen según la rama
       - name: Set Docker Image Tag
         id: get-tag
         run: |
@@ -66,12 +53,13 @@ jobs:
             echo "TAG=other" >> $GITHUB_ENV
           fi
 
-      # Paso 8: Construir la imagen Docker con la etiqueta correspondiente
+      # Paso 7: Construir la imagen Docker con los secretos
       - name: Build Docker Image
-        run: |
-          docker build --build-arg GPR_USER=${{ secrets.GPR_USER }} --build-arg GPR_TOKEN=${{ secrets.DOCKER_TOKEN }} -t ghcr.io/${{ github.repository }}:${{ env.TAG }} .
-
-      # Paso 9: Push de la imagen Docker a GHCR
-      - name: Push Docker Image
-        run: |
-          docker push ghcr.io/${{ github.repository }}:${{ env.TAG }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ env.TAG }}
+          secrets: |
+            gpr_user=${{github.actor}}
+            gpr_token=${{secrets.DOCKER_TOKEN}}
