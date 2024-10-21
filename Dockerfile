@@ -10,7 +10,7 @@ COPY . .
 # Set environment variables using Docker secrets and ejecutar el build
 RUN --mount=type=secret,id=gpr_user \
     --mount=type=secret,id=gpr_token \
-    sh -c 'export USERNAME=$(cat /run/secrets/gpr_user) && export TOKEN=$(cat /run/secrets/gpr_token) && gradle assemble --no-daemon'
+    sh -c 'export USERNAME=$(cat /run/secrets/gpr_user) && export TOKEN=$(cat /run/secrets/gpr_token) && echo "USERNAME: $USERNAME, TOKEN: $TOKEN" && gradle assemble --no-daemon'
 
 # Etapa final
 FROM openjdk:21-jdk-slim
