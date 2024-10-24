@@ -1,6 +1,8 @@
 package printscriptservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import printscriptservice.service.CompileService;
 
@@ -11,10 +13,10 @@ public class CompileController {
   @Autowired public CompileService compileService;
 
   @PostMapping
-  public String compile(
-      @RequestBody String language,
-      @RequestBody String code,
-      @RequestParam(name = "version", required = false) String version) {
-    return compileService.compile(language, code, version);
+  public ResponseEntity<String> compile(
+      @RequestParam("code") String code,
+      @RequestParam("language") String language,
+      @RequestParam("version") String version) {
+    return ResponseEntity.ok(compileService.compile(language, code, version));
   }
 }

@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+
+import org.springframework.http.HttpStatusCode;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.multipart.MultipartFile;
 import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;
@@ -42,10 +45,13 @@ public class PrintScript implements Language {
     InputStream inputStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
     try {
       runner.validate(inputStream, version);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     } catch (Exception e) {
-      return e.getMessage();
+      throw new HttpServerErrorException(HttpStatusCode.valueOf(500), "snippet could not compile");
     }
-    return "Success";
+
+    return "Compiled successfully";
   }
 
   @Override
