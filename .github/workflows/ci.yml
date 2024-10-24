@@ -21,6 +21,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Gradle
+        # get variables from secrets
         env:
           USERNAME: ${{ secrets.GPR_USERNAME }}
           TOKEN: ${{ secrets.DOCKER_TOKEN }}
