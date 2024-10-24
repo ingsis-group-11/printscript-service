@@ -41,53 +41,9 @@ public class WebClientUtility {
         });
   }
 
-  public InputStream getInputStream(String url) {
-    Flux<DataBuffer> dataBufferFlux =
-        this.webClient
-            .get()
-            .uri(url)
-            .accept(MediaType.TEXT_EVENT_STREAM)
-            .retrieve()
-            .bodyToFlux(DataBuffer.class);
 
-    byte[] byteArray = getBytes(dataBufferFlux);
-
-    return new ByteArrayInputStream(byteArray);
-  }
-
-  public <T> Mono<T> putFlux(Flux<DataBuffer> dataBufferFlux, String url, Class<T> responseType) {
-    return this.webClient
-        .put()
-        .uri(url)
-        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .body(BodyInserters.fromPublisher(dataBufferFlux, DataBuffer.class))
-        .retrieve()
-        .bodyToMono(responseType);
-  }
-
-  private byte[] getBytes(Flux<DataBuffer> dataBufferFlux) {
-    byte[] byteArray =
-        dataBufferFlux
-            .flatMap(dataBuffer -> Flux.just(dataBuffer.asByteBuffer()))
-            .collectList()
-            .map(
-                byteBuffers -> {
-                  int totalSize = byteBuffers.stream().mapToInt(buffer -> buffer.remaining()).sum();
-                  byte[] bytes = new byte[totalSize];
-                  int offset = 0;
-                  for (ByteBuffer buffer : byteBuffers) {
-                    int remaining = buffer.remaining();
-                    buffer.get(bytes, offset, remaining);
-                    offset += remaining;
-                  }
-                  return bytes;
-                })
-            .block();
-    return byteArray;
-  }
-
-  public <T> Mono<T> getAsync(String url, Class<T> responseType) {
-    return webClient.get().uri(url).retrieve().bodyToMono(responseType);
+  public <R> Mono<ResponseEntity<R>> getAsync(String url, Class<R> responseType) {
+    return webClient.get().uri(url).retrieve().toEntity(responseType);
   }
 
   public <T, R> Mono<ResponseEntity<R>> postAsync(String url, T body, Class<R> responseType) {

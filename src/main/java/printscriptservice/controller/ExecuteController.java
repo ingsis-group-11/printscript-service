@@ -1,28 +1,37 @@
 package printscriptservice.controller;
 
 import java.io.IOException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import printscriptservice.service.ExecuteService;
+import printscriptservice.webservice.snippet.SnippetManager;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/run")
 public class ExecuteController {
   private final ExecuteService executeService;
+  private final SnippetManager snippetManager;
 
-  public ExecuteController(ExecuteService executeService) {
+  @Autowired
+  public ExecuteController(ExecuteService executeService, SnippetManager snippetManager) {
     this.executeService = executeService;
+    this.snippetManager = snippetManager;
   }
 
   @PostMapping()
-  public String execute(
-      @RequestParam("code") MultipartFile code,
-      @RequestParam("language") String language,
-      @RequestParam("version") String version)
-      throws IOException {
-    return executeService.execute(language, code, version);
+  public Mono<String> execute(
+      @RequestParam("snippetId") String snippetId) {
+    return snippetManager.getSnippet(snippetId)
+        .handle((snippet, sink) -> {
+          try {
+            sink.next(executeService.execute(snippet.getLanguage(), snippet.getContent(), snippet.getVersion()));
+          } catch (IOException e) {
+            sink.error(new RuntimeException(e));
+          }
+        });
   }
 }

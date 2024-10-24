@@ -17,13 +17,13 @@ import runner.ValidationRunner;
 public class PrintScript implements Language {
 
   @Override
-  public String execute(MultipartFile code, String version) throws IOException {
+  public String execute(String code, String version) throws IOException {
     if (version == null) {
       version = "1.1";
     }
     Runner runner = new Runner();
     TestPrintProvider testPrintProvider = new TestPrintProvider();
-    InputStream inputStream = code.getInputStream();
+    InputStream inputStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
     runner.run(inputStream, version, testPrintProvider);
     StringBuilder output = new StringBuilder();
     Iterator<String> messages = testPrintProvider.getMessages();
