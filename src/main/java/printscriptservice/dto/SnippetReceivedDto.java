@@ -7,7 +7,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class SnippetReceivedDTO {
+public class SnippetReceivedDto {
   private String assetId;
   private String language;
   private String version;

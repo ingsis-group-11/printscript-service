@@ -23,15 +23,18 @@ public class ExecuteController {
   }
 
   @PostMapping()
-  public Mono<String> execute(
-      @RequestParam("snippetId") String snippetId) {
-    return snippetManager.getSnippet(snippetId)
-        .handle((snippet, sink) -> {
-          try {
-            sink.next(executeService.execute(snippet.getLanguage(), snippet.getContent(), snippet.getVersion()));
-          } catch (IOException e) {
-            sink.error(new RuntimeException(e));
-          }
-        });
+  public Mono<String> execute(@RequestParam("snippetId") String snippetId) {
+    return snippetManager
+        .getSnippet(snippetId)
+        .handle(
+            (snippet, sink) -> {
+              try {
+                sink.next(
+                    executeService.execute(
+                        snippet.getLanguage(), snippet.getContent(), snippet.getVersion()));
+              } catch (IOException e) {
+                sink.error(new RuntimeException(e));
+              }
+            });
   }
 }

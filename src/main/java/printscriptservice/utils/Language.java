@@ -1,7 +1,6 @@
 package printscriptservice.utils;
 
 import java.io.IOException;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface Language {
   public String execute(String code, String version) throws IOException;
