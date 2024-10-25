@@ -48,7 +48,7 @@ public class PrintScript implements Language {
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (Exception e) {
-      throw new HttpServerErrorException(HttpStatusCode.valueOf(500), "snippet could not compile");
+      throw new HttpServerErrorException(HttpStatusCode.valueOf(500), e.getMessage());
     }
 
     return "Compiled successfully";
