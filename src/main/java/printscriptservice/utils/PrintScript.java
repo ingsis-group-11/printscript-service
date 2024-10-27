@@ -1,13 +1,16 @@
 package printscriptservice.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import java.util.List;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.HttpServerErrorException;
+import printscriptservice.dto.RuleDto;
 import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;
 import runner.FormatterRunner;
@@ -18,20 +21,24 @@ import runner.ValidationRunner;
 public class PrintScript implements Language {
 
   @Override
-  public String execute(String code, String version) throws IOException {
+  public String execute(String code, String version) {
     if (version == null) {
       version = "1.1";
     }
     Runner runner = new Runner();
     TestPrintProvider testPrintProvider = new TestPrintProvider();
     InputStream inputStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
-    runner.run(inputStream, version, testPrintProvider);
-    StringBuilder output = new StringBuilder();
-    Iterator<String> messages = testPrintProvider.getMessages();
-    while (messages.hasNext()) {
-      output.append(messages.next());
+    try {
+      runner.run(inputStream, version, testPrintProvider);
+      StringBuilder output = new StringBuilder();
+      Iterator<String> messages = testPrintProvider.getMessages();
+      while (messages.hasNext()) {
+        output.append(messages.next());
+      }
+      return output.toString();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-    return output.toString();
   }
 
   @Override
@@ -53,13 +60,14 @@ public class PrintScript implements Language {
   }
 
   @Override
-  public String analyze(String code, String rules, String version) {
+  public String analyze(String code, List<RuleDto> rules, String version) {
     if (version == null) {
       version = "1.1";
     }
     LinterRunner runner = new LinterRunner();
     try {
-      runner.linterRun(new FileInputStream(code), new FileInputStream(rules), version);
+      InputStream rulesStream = listOfRulesDtoToInputStream(rules);
+      runner.linterRun(new FileInputStream(code), rulesStream, version);
     } catch (Exception e) {
       return e.getMessage();
     }
@@ -80,5 +88,15 @@ public class PrintScript implements Language {
       return e.getMessage();
     }
     return "Success";
+  }
+
+  private InputStream listOfRulesDtoToInputStream(List<RuleDto> rules) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      String jsonString = objectMapper.writeValueAsString(rules);
+      return new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to convert rules to JSON", e);
+    }
   }
 }

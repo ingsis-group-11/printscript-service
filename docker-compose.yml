@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: "printscript-service--api"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8080"
+    env_file:
+      - .env
+
+  redis:
+    image: redis:latest
+    container_name: redis-printscript-service
+    ports:
+      - "6379:6379"
