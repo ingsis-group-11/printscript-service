@@ -1,5 +1,7 @@
 package printscriptservice.redis;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +10,7 @@ import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.stream.StreamReceiver;
 import org.springframework.stereotype.Component;
+import printscriptservice.dto.SnippetReceivedDto;
 import printscriptservice.service.AnalyzeService;
 import reactor.core.publisher.Flux;
 
@@ -37,12 +40,33 @@ public class LintConsumer {
   }
 
   private void processMessage(MapRecord<String, String, String> message) {
-    System.out.println("Received message from stream: " + streamKey);
-    System.out.println("Message ID: " + message.getId());
-    System.out.println("Message Body: " + message.getValue());
 
-    analyzeService.analyze(message.getValue().get("payload"));
+    String messageBody = message.getValue().get("payload");
 
-    // Acknowledge processing by printing or performing additional actions here
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode jsonNode = objectMapper.readTree(messageBody);
+
+      String assetId = jsonNode.get("assetId").asText();
+      String language = jsonNode.get("language").asText();
+      String version = jsonNode.get("version").asText();
+      String content = jsonNode.get("content").asText();
+      String userId = jsonNode.get("userId").asText();
+
+      SnippetReceivedDto snippetReceivedDto = SnippetReceivedDto.builder()
+          .assetId(assetId)
+          .language(language)
+          .version(version)
+          .content(content)
+          .userId(userId)
+          .build();
+
+      //analyzeService.analyze(snippetReceivedDto);
+      System.out.println(snippetReceivedDto);
+
+    } catch (Exception e) {
+      throw new RuntimeException("Error processing message", e);
+    }
+
   }
 }

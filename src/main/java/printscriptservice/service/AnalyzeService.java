@@ -15,6 +15,22 @@ public class AnalyzeService {
 
   @Autowired private SnippetManager snippetManager;
 
+  public String analyze(SnippetReceivedDto snippetReceivedDto) {
+    String assetId = snippetReceivedDto.getAssetId();
+    ResponseEntity<SnippetReceivedDto> snippet = snippetManager.getSnippet(assetId);
+    if (snippet.getStatusCode() != HttpStatus.OK) {
+      return "Error: Could not retrieve snippet";
+    }
+    ResponseEntity<List<RuleDto>> rules = snippetManager.getRules();
+    if (rules.getStatusCode() != HttpStatus.OK) {
+      return "Error: Could not retrieve rules";
+    }
+    SnippetReceivedDto snippetReceived = snippet.getBody();
+    assert snippetReceived != null;
+    return LanguageFactory.getLanguage(snippetReceived.getLanguage())
+        .analyze(snippetReceived.getContent(), rules.getBody(), snippetReceived.getVersion());
+  }
+
   public String analyze(String assetId) {
     ResponseEntity<SnippetReceivedDto> snippet = snippetManager.getSnippet(assetId);
     if (snippet.getStatusCode() != HttpStatus.OK) {
@@ -24,9 +40,9 @@ public class AnalyzeService {
     if (rules.getStatusCode() != HttpStatus.OK) {
       return "Error: Could not retrieve rules";
     }
-    SnippetReceivedDto snippetReceivedDto = snippet.getBody();
-    assert snippetReceivedDto != null;
-    return LanguageFactory.getLanguage(snippetReceivedDto.getLanguage())
-        .analyze(snippetReceivedDto.getContent(), rules.getBody(), snippetReceivedDto.getVersion());
+    SnippetReceivedDto snippetReceived = snippet.getBody();
+    assert snippetReceived != null;
+    return LanguageFactory.getLanguage(snippetReceived.getLanguage())
+        .analyze(snippetReceived.getContent(), rules.getBody(), snippetReceived.getVersion());
   }
 }
