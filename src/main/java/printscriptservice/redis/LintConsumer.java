@@ -53,20 +53,20 @@ public class LintConsumer {
       String content = jsonNode.get("content").asText();
       String userId = jsonNode.get("userId").asText();
 
-      SnippetReceivedDto snippetReceivedDto = SnippetReceivedDto.builder()
-          .assetId(assetId)
-          .language(language)
-          .version(version)
-          .content(content)
-          .userId(userId)
-          .build();
+      SnippetReceivedDto snippetReceivedDto =
+          SnippetReceivedDto.builder()
+              .assetId(assetId)
+              .language(language)
+              .version(version)
+              .content(content)
+              .userId(userId)
+              .build();
 
-      //analyzeService.analyze(snippetReceivedDto);
+      // analyzeService.analyze(snippetReceivedDto);
       System.out.println(snippetReceivedDto);
 
     } catch (Exception e) {
       throw new RuntimeException("Error processing message", e);
     }
-
   }
 }
