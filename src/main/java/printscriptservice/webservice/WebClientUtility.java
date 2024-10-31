@@ -1,5 +1,6 @@
 package printscriptservice.webservice;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -34,7 +35,8 @@ public class WebClientUtility {
         });
   }
 
-  public <R> Mono<ResponseEntity<R>> getAsync(String url, Class<R> responseType) {
+  public <R> Mono<ResponseEntity<R>> getAsync(
+      String url, ParameterizedTypeReference<R> responseType) {
     return webClient.get().uri(url).retrieve().toEntity(responseType);
   }
 
