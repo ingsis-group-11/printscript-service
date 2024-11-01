@@ -23,7 +23,7 @@ snippet:
 
 asset:
   manager:
-    url: ${ASSET_MANAGER_URL:http://localhost:8080}
+    url: ${ASSET_MANAGER_URL:http://localhost:8082}
 
 auth0:
   audience: ${AUTH0_AUDIENCE}
@@ -37,4 +37,6 @@ redis:
 
 stream:
   key:
-    lint: "lint"
+    lint: "lint-queue"
+  group:
+    lint: "lint-group"

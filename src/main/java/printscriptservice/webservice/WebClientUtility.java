@@ -1,7 +1,12 @@
 package printscriptservice.webservice;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -54,5 +60,28 @@ public class WebClientUtility {
 
   public <T> Mono<T> delete(String url, Class<T> responseEntityClass) {
     return webClient.delete().uri(url).retrieve().bodyToMono(responseEntityClass);
+  }
+
+  public InputStream getInputStream(String url) {
+    Flux<DataBuffer> dataBufferFlux =
+        this.webClient
+            .get()
+            .uri(url)
+            .accept(MediaType.TEXT_EVENT_STREAM)
+            .retrieve()
+            .bodyToFlux(DataBuffer.class);
+
+    byte[] byteArray = getBytes(dataBufferFlux);
+
+    return new ByteArrayInputStream(byteArray);
+  }
+
+  private byte[] getBytes(Flux<DataBuffer> dataBufferFlux) {
+    DataBuffer dataBuffer = DataBufferUtils.join(dataBufferFlux).block();
+    assert dataBuffer != null;
+    byte[] byteArray = new byte[dataBuffer.readableByteCount()];
+    dataBuffer.read(byteArray);
+    DataBufferUtils.release(dataBuffer);
+    return byteArray;
   }
 }

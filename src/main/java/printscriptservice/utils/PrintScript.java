@@ -1,16 +1,13 @@
 package printscriptservice.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
-import java.util.List;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.HttpServerErrorException;
-import printscriptservice.dto.RuleDto;
 import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;
 import runner.FormatterRunner;
@@ -60,15 +57,16 @@ public class PrintScript implements Language {
   }
 
   @Override
-  public String analyze(String code, List<RuleDto> rules, String version) {
+  public String analyze(InputStream code, InputStream rules, String version) {
     if (version == null) {
       version = "1.1";
     }
     LinterRunner runner = new LinterRunner();
     try {
-      InputStream rulesStream = listOfRulesDtoToInputStream(rules);
-      runner.linterRun(new FileInputStream(code), rulesStream, version);
+      runner.linterRun(code, rules, version);
+      System.out.println("after linting");
     } catch (Exception e) {
+      System.out.println("inside catch");
       return e.getMessage();
     }
     return "Success";
@@ -88,15 +86,5 @@ public class PrintScript implements Language {
       return e.getMessage();
     }
     return "Success";
-  }
-
-  private InputStream listOfRulesDtoToInputStream(List<RuleDto> rules) {
-    try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      String jsonString = objectMapper.writeValueAsString(rules);
-      return new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to convert rules to JSON", e);
-    }
   }
 }
