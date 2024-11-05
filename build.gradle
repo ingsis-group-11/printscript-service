@@ -41,6 +41,14 @@ repositories {
 			password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
 		}
 	}
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/austral-ingsis/class-redis-streams")
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+        }
+    }
 }
 
 dependencies {
@@ -50,12 +58,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    implementation 'io.netty:netty-resolver-dns-native-macos:4.1.94.Final:osx-aarch_64'
     compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'io.github.cdimascio:dotenv-java:2.2.0'
+    implementation 'org.austral.ingsis:redis-streams-mvc:0.1.13'
+    testImplementation 'org.mockito:mockito-core'
 
 	//PrintScript dependencies
 	implementation 'printScript:lexer:1.1-SNAPSHOT'

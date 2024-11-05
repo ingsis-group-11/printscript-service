@@ -1,72 +1,60 @@
 package printscriptservice.redis;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
+import java.time.Duration;
+import org.austral.ingsis.redis.RedisStreamConsumer;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.connection.stream.ObjectRecord;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.stream.StreamReceiver;
 import org.springframework.stereotype.Component;
 import printscriptservice.dto.SnippetReceivedDto;
 import printscriptservice.service.AnalyzeService;
-import reactor.core.publisher.Flux;
 
 @Component
-public class LintConsumer {
+@Profile("!test")
+public class LintConsumer extends RedisStreamConsumer<String> {
 
-  private final ReactiveRedisTemplate<String, String> redisTemplate;
-  private final StreamReceiver<String, MapRecord<String, String, String>> streamReceiver;
-  private final String streamKey;
   @Autowired private AnalyzeService analyzeService;
 
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
   public LintConsumer(
-      @Value("${stream.key.lint}") String streamKey,
-      ReactiveRedisTemplate<String, String> redisTemplate,
-      StreamReceiver<String, MapRecord<String, String, String>> streamReceiver) {
-    this.streamKey = streamKey;
-    this.redisTemplate = redisTemplate;
-    this.streamReceiver = streamReceiver;
+      @Value("${stream.key.lint}") @NotNull String streamKey,
+      @Value("${stream.group.lint}") @NotNull String consumerGroup,
+      @NotNull RedisTemplate<String, String> redis) {
+    super(streamKey, consumerGroup, redis);
   }
 
-  @PostConstruct
-  public void startConsuming() {
-    Flux<MapRecord<String, String, String>> messageFlux =
-        streamReceiver.receive(StreamOffset.fromStart(streamKey));
-
-    messageFlux.doOnNext(this::processMessage).subscribe();
-  }
-
-  private void processMessage(MapRecord<String, String, String> message) {
-
-    String messageBody = message.getValue().get("payload");
-
+  @Override
+  protected void onMessage(@NotNull ObjectRecord<String, String> objectRecord) {
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      JsonNode jsonNode = objectMapper.readTree(messageBody);
-
-      String assetId = jsonNode.get("assetId").asText();
-      String language = jsonNode.get("language").asText();
-      String version = jsonNode.get("version").asText();
-      String content = jsonNode.get("content").asText();
-      String userId = jsonNode.get("userId").asText();
-
+      String jsonValue = objectRecord.getValue();
       SnippetReceivedDto snippetReceivedDto =
-          SnippetReceivedDto.builder()
-              .assetId(assetId)
-              .language(language)
-              .version(version)
-              .content(content)
-              .userId(userId)
-              .build();
+          objectMapper.readValue(jsonValue, SnippetReceivedDto.class);
 
-      // analyzeService.analyze(snippetReceivedDto);
-      System.out.println(snippetReceivedDto);
+      // Now you can access each field of snippetReceivedDto
+      System.out.println("Asset ID: " + snippetReceivedDto.getAssetId());
+      System.out.println("Language: " + snippetReceivedDto.getLanguage());
+      System.out.println("Version: " + snippetReceivedDto.getVersion());
+      System.out.println("User ID: " + snippetReceivedDto.getUserId());
+
+      analyzeService.analyze(snippetReceivedDto);
 
     } catch (Exception e) {
-      throw new RuntimeException("Error processing message", e);
+      throw new RuntimeException(e);
     }
+  }
+
+  @NotNull
+  @Override
+  protected StreamReceiver.StreamReceiverOptions<String, ObjectRecord<String, String>> options() {
+    return StreamReceiver.StreamReceiverOptions.builder()
+        .pollTimeout(Duration.ofSeconds(5))
+        .targetType(String.class)
+        .build();
   }
 }

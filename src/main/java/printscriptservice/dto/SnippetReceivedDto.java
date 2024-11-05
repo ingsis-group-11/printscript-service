@@ -1,16 +1,17 @@
 package printscriptservice.dto;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Builder
 @Getter
 @Setter
+@NoArgsConstructor
 public class SnippetReceivedDto {
   private String assetId;
   private String userId;
   private String language;
   private String version;
   private String content;
+  private String lintingResult;
 }
