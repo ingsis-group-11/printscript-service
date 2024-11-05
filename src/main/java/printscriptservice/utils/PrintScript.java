@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
+import printscriptservice.redis.lint.LintProducer;
 import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;
 import runner.FormatterRunner;
@@ -15,7 +18,14 @@ import runner.LinterRunner;
 import runner.Runner;
 import runner.ValidationRunner;
 
+@Service
 public class PrintScript implements Language {
+  private final LintProducer lintProducer;
+
+  @Autowired
+  public PrintScript(LintProducer lintProducer) {
+    this.lintProducer = lintProducer;
+  }
 
   @Override
   public String execute(String code, String version) {
@@ -57,18 +67,20 @@ public class PrintScript implements Language {
   }
 
   @Override
-  public String analyze(InputStream code, InputStream rules, String version) {
+  public String analyze(String assetId, InputStream code, InputStream rules, String version) {
     if (version == null) {
       version = "1.1";
     }
     LinterRunner runner = new LinterRunner();
     try {
       runner.linterRun(code, rules, version);
-      System.out.println("after linting");
     } catch (Exception e) {
-      System.out.println("inside catch");
+      lintProducer.publishEvent(assetId, LintResult.FAILURE);
       return e.getMessage();
     }
+
+    lintProducer.publishEvent(assetId, LintResult.SUCCESS);
+
     return "Success";
   }
 
