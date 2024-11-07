@@ -1,4 +1,4 @@
-package printscriptservice.redis;
+package printscriptservice.redis.lint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;

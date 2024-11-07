@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import printscriptservice.dto.RuleDto;
 import printscriptservice.dto.SnippetReceivedDto;
+import printscriptservice.redis.lint.LintProducer;
 import printscriptservice.utils.LanguageFactory;
+import printscriptservice.utils.LintResult;
 import printscriptservice.webservice.asset.AssetManager;
 import printscriptservice.webservice.snippet.SnippetManager;
 
@@ -19,6 +21,8 @@ public class AnalyzeService {
 
   @Autowired private AssetManager assetManager;
 
+  @Autowired private LintProducer lintProducer;
+
   private final String assetManagerContainer = "snippets";
 
   private final String rulesContainer = "lint-rules";
@@ -28,9 +32,9 @@ public class AnalyzeService {
     String userId = snippetReceivedDto.getUserId();
     InputStream content = assetManager.getAsset(assetManagerContainer, assetId);
     InputStream rules = assetManager.getRules(rulesContainer, userId);
-
+    lintProducer.publishEvent(assetId, LintResult.IN_PROGRESS);
     return LanguageFactory.getLanguage(snippetReceivedDto.getLanguage())
-        .analyze(content, rules, snippetReceivedDto.getVersion());
+        .analyze(assetId, content, rules, snippetReceivedDto.getVersion());
   }
 
   public String analyze(String assetId) {

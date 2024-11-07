@@ -7,7 +7,7 @@ public interface Language {
 
   public String compile(String code, String version);
 
-  public String analyze(InputStream code, InputStream rules, String version);
+  public String analyze(String assetId, InputStream code, InputStream rules, String version);
 
   public String format(String code, String rules, String outputPath, String version);
 }
