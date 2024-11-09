@@ -15,4 +15,5 @@ public class SnippetReceivedDto {
   private String version;
   private String content;
   private String compliance;
+  private String extension;
 }
