@@ -1,4 +1,4 @@
-package printscriptservice.redis.lint;
+package printscriptservice.redis.formatter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
@@ -12,19 +12,19 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.stream.StreamReceiver;
 import org.springframework.stereotype.Component;
 import printscriptservice.dto.SnippetReceivedDto;
-import printscriptservice.service.AnalyzeService;
+import printscriptservice.service.FormatService;
 
 @Component
 @Profile("!test")
-public class LintConsumer extends RedisStreamConsumer<String> {
+public class FormatterConsumer extends RedisStreamConsumer<String> {
 
-  @Autowired private AnalyzeService analyzeService;
+  @Autowired private FormatService formatService;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  public LintConsumer(
-      @Value("${redis.consumer.lint.queue}") @NotNull String streamKey,
-      @Value("${redis.consumer.lint.group}") @NotNull String consumerGroup,
+  public FormatterConsumer(
+      @Value("${redis.consumer.formatter.queue}") @NotNull String streamKey,
+      @Value("${redis.consumer.formatter.group}") @NotNull String consumerGroup,
       @NotNull RedisTemplate<String, String> redis) {
     super(streamKey, consumerGroup, redis);
   }
@@ -42,7 +42,7 @@ public class LintConsumer extends RedisStreamConsumer<String> {
       System.out.println("Version: " + snippetReceivedDto.getVersion());
       System.out.println("User ID: " + snippetReceivedDto.getUserId());
 
-      analyzeService.analyze(snippetReceivedDto);
+      formatService.format(snippetReceivedDto);
 
     } catch (Exception e) {
       throw new RuntimeException(e);

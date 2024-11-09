@@ -10,8 +10,9 @@ import lombok.Setter;
 public class SnippetReceivedDto {
   private String assetId;
   private String userId;
+  private String name;
   private String language;
   private String version;
   private String content;
-  private String lintingResult;
+  private String compliance;
 }

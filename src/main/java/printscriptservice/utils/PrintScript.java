@@ -1,10 +1,11 @@
 package printscriptservice.utils;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
@@ -85,18 +86,32 @@ public class PrintScript implements Language {
   }
 
   @Override
-  public String format(String code, String rules, String outputPath, String version) {
+  public String format(InputStream code, InputStream rules, String version) {
     if (version == null) {
       version = "1.1";
     }
     try {
       FormatterRunner runner = new FormatterRunner();
-      FileInputStream codeStream = new FileInputStream(code);
-      FileWriter fileWriter = new FileWriter(outputPath);
-      runner.format(new FileInputStream(code), codeStream, fileWriter, version);
+
+      // Create a temporary file for output
+      Path tempFile = Files.createTempFile("formatted_output", ".txt");
+
+      // Use FileWriter with the temporary file path
+      FileWriter fileWriter = new FileWriter(tempFile.toString());
+
+      // Format the code using the provided runner
+      runner.format(code, rules, fileWriter, version);
+
+      // Read the content from the temporary file
+      String formattedCode = Files.readString(tempFile);
+
+      // Delete the temporary file
+      Files.delete(tempFile);
+
+      return formattedCode;
+
     } catch (Exception e) {
-      return e.getMessage();
+      throw new RuntimeException(e.getMessage());
     }
-    return "Success";
   }
 }
