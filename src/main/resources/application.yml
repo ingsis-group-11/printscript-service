@@ -36,10 +36,13 @@ redis:
     port: ${REDIS_PORT:6379}
     producer:
       lint: "lint-results"
-      formatter: "formatter-queue"
+    consumer:
+        lint:
+            queue: "lint-queue"
+            group: "lint-group"
+        formatter:
+            queue: "formatter-queue"
+            group: "formatter-group"
 
-stream:
-  key:
-    lint: "lint-queue"
-  group:
-    lint: "lint-group"
+
+

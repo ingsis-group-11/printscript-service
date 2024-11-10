@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -60,6 +61,17 @@ public class WebClientUtility {
 
   public <T> Mono<T> delete(String url, Class<T> responseEntityClass) {
     return webClient.delete().uri(url).retrieve().bodyToMono(responseEntityClass);
+  }
+
+  public <T> Mono<ResponseEntity<T>> putFlux(
+      Flux<DataBuffer> dataBufferFlux, String url, Class<T> responseType) {
+    return this.webClient
+        .put()
+        .uri(url)
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .body(BodyInserters.fromPublisher(dataBufferFlux, DataBuffer.class))
+        .retrieve()
+        .toEntity(responseType);
   }
 
   public InputStream getInputStream(String url) {
