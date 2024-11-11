@@ -114,4 +114,40 @@ public class PrintScript implements Language {
       throw new RuntimeException(e.getMessage());
     }
   }
+
+  @Override
+  public String format(String code, String version) {
+    if (version == null) {
+      version = "1.1";
+    }
+    try {
+      FormatterRunner runner = new FormatterRunner();
+
+      // Create a temporary file for output
+      Path tempFile = Files.createTempFile("formatted_output", ".txt");
+
+      // Use FileWriter with the temporary file path
+      FileWriter fileWriter = new FileWriter(tempFile.toString());
+
+      InputStream codeStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+
+      // Read the default formatter rules from the JSON file
+      InputStream rulesStream =
+          getClass().getClassLoader().getResourceAsStream("rules/allActive.json");
+
+      // Format the code using the provided runner
+      runner.format(codeStream, rulesStream, fileWriter, version);
+
+      // Read the content from the temporary file
+      String formattedCode = Files.readString(tempFile);
+
+      // Delete the temporary file
+      Files.delete(tempFile);
+
+      return formattedCode;
+
+    } catch (Exception e) {
+      throw new RuntimeException(e.getMessage());
+    }
+  }
 }

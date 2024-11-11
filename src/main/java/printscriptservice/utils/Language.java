@@ -10,4 +10,6 @@ public interface Language {
   public String analyze(String assetId, InputStream code, InputStream rules, String version);
 
   public String format(InputStream code, InputStream rules, String version);
+
+  public String format(String code, String version);
 }

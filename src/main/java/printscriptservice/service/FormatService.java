@@ -1,6 +1,8 @@
 package printscriptservice.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +35,14 @@ public class FormatService {
   }
 
   public String format(String content) {
-    return content;
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      Map<String, String> map = objectMapper.readValue(content, Map.class);
+      content = map.getOrDefault("content", "");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return LanguageFactory.getLanguage("printscript").format(content, "1.1");
   }
 }
