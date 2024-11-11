@@ -17,7 +17,7 @@ public class LanguageFactory {
 
   public static Language getLanguage(String input) {
     String language = input.replace("\"", "");
-    if (language.equals("PRINTSCRIPT")) {
+    if (language.equalsIgnoreCase("PRINTSCRIPT")) {
       LintProducer lintProducer = context.getBean(LintProducer.class);
       return new PrintScript(lintProducer);
     }
