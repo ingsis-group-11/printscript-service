@@ -23,10 +23,26 @@ snippet:
 
 asset:
   manager:
-    url: ${ASSET_MANAGER_URL:http://localhost:8080}
+    url: ${ASSET_MANAGER_URL:http://localhost:8082}
 
 auth0:
   audience: ${AUTH0_AUDIENCE}
 
 server:
   port: ${DOCKER_PORT:8004}
+
+redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    producer:
+      lint: "lint-results"
+    consumer:
+        lint:
+            queue: "lint-queue"
+            group: "lint-group"
+        formatter:
+            queue: "formatter-queue"
+            group: "formatter-group"
+
+
+

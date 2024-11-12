@@ -1,10 +1,20 @@
 package printscriptservice.webservice.asset;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import printscriptservice.webservice.WebClientUtility;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Component
 public class AssetManager {
@@ -16,7 +26,45 @@ public class AssetManager {
   private String assetManagerUrl;
 
   public InputStream getAsset(String container, String assetKey) {
-    String url = assetManagerUrl + "v1/asset/" + container + "/" + assetKey;
+    String url = assetManagerUrl + "/v1/asset/" + container + "/" + assetKey;
     return webClientUtility.getInputStream(url);
+  }
+
+  public InputStream getRules(String rulesContainer, String userId) {
+    String url = assetManagerUrl + "/v1/asset/" + rulesContainer + "/" + userId;
+    return webClientUtility.getInputStream(url);
+  }
+
+  public ResponseEntity<String> createAsset(
+      String container, String assetKey, MultipartFile content) {
+    String url = assetManagerUrl + "/v1/asset/" + container + "/" + assetKey;
+    Mono<ResponseEntity<String>> response =
+        webClientUtility.putFlux(convertMultipartFileToFlux(content), url, String.class);
+    return response.block(Duration.ofSeconds(timeOutInSeconds));
+  }
+
+  private Flux<DataBuffer> convertMultipartFileToFlux(MultipartFile multipartFile) {
+    try {
+      InputStream inputStream = multipartFile.getInputStream();
+      return Flux.generate(
+          sink -> {
+            try {
+              ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+              int readBytes = Channels.newChannel(inputStream).read(byteBuffer);
+
+              if (readBytes == -1) {
+                sink.complete();
+              } else {
+                byteBuffer.flip();
+                DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(byteBuffer);
+                sink.next(dataBuffer);
+              }
+            } catch (IOException e) {
+              sink.error(e);
+            }
+          });
+    } catch (IOException e) {
+      throw new RuntimeException("Error reading the file content: " + multipartFile.getName(), e);
+    }
   }
 }

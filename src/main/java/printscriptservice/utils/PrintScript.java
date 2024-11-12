@@ -1,12 +1,17 @@
 package printscriptservice.utils;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
+import printscriptservice.redis.lint.LintProducer;
 import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;
 import runner.FormatterRunner;
@@ -14,23 +19,34 @@ import runner.LinterRunner;
 import runner.Runner;
 import runner.ValidationRunner;
 
+@Service
 public class PrintScript implements Language {
+  private final LintProducer lintProducer;
+
+  @Autowired
+  public PrintScript(LintProducer lintProducer) {
+    this.lintProducer = lintProducer;
+  }
 
   @Override
-  public String execute(MultipartFile code, String version) throws IOException {
+  public String execute(String code, String version) {
     if (version == null) {
       version = "1.1";
     }
     Runner runner = new Runner();
     TestPrintProvider testPrintProvider = new TestPrintProvider();
-    InputStream inputStream = code.getInputStream();
-    runner.run(inputStream, version, testPrintProvider);
-    StringBuilder output = new StringBuilder();
-    Iterator<String> messages = testPrintProvider.getMessages();
-    while (messages.hasNext()) {
-      output.append(messages.next());
+    InputStream inputStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    try {
+      runner.run(inputStream, version, testPrintProvider);
+      StringBuilder output = new StringBuilder();
+      Iterator<String> messages = testPrintProvider.getMessages();
+      while (messages.hasNext()) {
+        output.append(messages.next());
+      }
+      return output.toString();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-    return output.toString();
   }
 
   @Override
@@ -42,39 +58,96 @@ public class PrintScript implements Language {
     InputStream inputStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
     try {
       runner.validate(inputStream, version);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     } catch (Exception e) {
-      return e.getMessage();
+      throw new HttpServerErrorException(HttpStatusCode.valueOf(500), e.getMessage());
     }
-    return "Success";
+
+    return "Compiled successfully";
   }
 
   @Override
-  public String analyze(String code, String rules, String version) {
+  public String analyze(String assetId, InputStream code, InputStream rules, String version) {
     if (version == null) {
       version = "1.1";
     }
     LinterRunner runner = new LinterRunner();
     try {
-      runner.linterRun(new FileInputStream(code), new FileInputStream(rules), version);
+      runner.linterRun(code, rules, version);
     } catch (Exception e) {
+      lintProducer.publishEvent(assetId, LintResult.FAILURE);
       return e.getMessage();
     }
+
+    lintProducer.publishEvent(assetId, LintResult.SUCCESS);
+
     return "Success";
   }
 
   @Override
-  public String format(String code, String rules, String outputPath, String version) {
+  public String format(InputStream code, InputStream rules, String version) {
     if (version == null) {
       version = "1.1";
     }
     try {
       FormatterRunner runner = new FormatterRunner();
-      FileInputStream codeStream = new FileInputStream(code);
-      FileWriter fileWriter = new FileWriter(outputPath);
-      runner.format(new FileInputStream(code), codeStream, fileWriter, version);
+
+      // Create a temporary file for output
+      Path tempFile = Files.createTempFile("formatted_output", ".txt");
+
+      // Use FileWriter with the temporary file path
+      FileWriter fileWriter = new FileWriter(tempFile.toString());
+
+      // Format the code using the provided runner
+      runner.format(code, rules, fileWriter, version);
+
+      // Read the content from the temporary file
+      String formattedCode = Files.readString(tempFile);
+
+      // Delete the temporary file
+      Files.delete(tempFile);
+
+      return formattedCode;
+
     } catch (Exception e) {
-      return e.getMessage();
+      throw new RuntimeException(e.getMessage());
     }
-    return "Success";
+  }
+
+  @Override
+  public String format(String code, String version) {
+    if (version == null) {
+      version = "1.1";
+    }
+    try {
+      FormatterRunner runner = new FormatterRunner();
+
+      // Create a temporary file for output
+      Path tempFile = Files.createTempFile("formatted_output", ".txt");
+
+      // Use FileWriter with the temporary file path
+      FileWriter fileWriter = new FileWriter(tempFile.toString());
+
+      InputStream codeStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+
+      // Read the default formatter rules from the JSON file
+      InputStream rulesStream =
+          getClass().getClassLoader().getResourceAsStream("rules/allActive.json");
+
+      // Format the code using the provided runner
+      runner.format(codeStream, rulesStream, fileWriter, version);
+
+      // Read the content from the temporary file
+      String formattedCode = Files.readString(tempFile);
+
+      // Delete the temporary file
+      Files.delete(tempFile);
+
+      return formattedCode;
+
+    } catch (Exception e) {
+      throw new RuntimeException(e.getMessage());
+    }
   }
 }

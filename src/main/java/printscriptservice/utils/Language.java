@@ -1,14 +1,15 @@
 package printscriptservice.utils;
 
-import java.io.IOException;
-import org.springframework.web.multipart.MultipartFile;
+import java.io.InputStream;
 
 public interface Language {
-  public String execute(MultipartFile code, String version) throws IOException;
+  public String execute(String code, String version);
 
   public String compile(String code, String version);
 
-  public String analyze(String code, String rules, String version);
+  public String analyze(String assetId, InputStream code, InputStream rules, String version);
 
-  public String format(String code, String rules, String outputPath, String version);
+  public String format(InputStream code, InputStream rules, String version);
+
+  public String format(String code, String version);
 }
