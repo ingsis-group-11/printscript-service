@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import printscriptservice.redis.lint.LintProducer;
@@ -62,11 +62,12 @@ public class PrintScript implements Language {
     try {
       runner.validate(inputStream, version);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("I/O error during compilation: " + e.getMessage());
     } catch (Exception e) {
-      throw new HttpServerErrorException(HttpStatusCode.valueOf(500), e.getMessage());
+      // Pass the specific validation error message to the exception
+      throw new HttpServerErrorException(
+          HttpStatus.INTERNAL_SERVER_ERROR, "Compilation error: " + e.getMessage());
     }
-
     return "Compiled successfully";
   }
 
@@ -119,32 +120,23 @@ public class PrintScript implements Language {
   }
 
   @Override
-  public String format(String code, String version) {
+  public String format(String code, InputStream rules, String version) {
     if (version == null) {
       version = "1.1";
     }
     try {
       FormatterRunner runner = new FormatterRunner();
 
-      // Create a temporary file for output
       Path tempFile = Files.createTempFile("formatted_output", ".txt");
 
-      // Use FileWriter with the temporary file path
       FileWriter fileWriter = new FileWriter(tempFile.toString());
 
       InputStream codeStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
 
-      // Read the default formatter rules from the JSON file
-      InputStream rulesStream =
-          getClass().getClassLoader().getResourceAsStream("rules/allActive.json");
+      runner.format(codeStream, rules, fileWriter, version);
 
-      // Format the code using the provided runner
-      runner.format(codeStream, rulesStream, fileWriter, version);
-
-      // Read the content from the temporary file
       String formattedCode = Files.readString(tempFile);
 
-      // Delete the temporary file
       Files.delete(tempFile);
 
       return formattedCode;
