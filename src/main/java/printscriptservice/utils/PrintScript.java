@@ -7,11 +7,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import printscriptservice.redis.lint.LintProducer;
+import providers.inputprovider.TestInputProvider;
 import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;
 import runner.FormatterRunner;
@@ -148,6 +151,36 @@ public class PrintScript implements Language {
 
     } catch (Exception e) {
       throw new RuntimeException(e.getMessage());
+    }
+  }
+
+  @Override
+  public String test(
+      String content, String language, String version, List<String> input, List<String> output) {
+    if (version == null) {
+      version = "1.1";
+    }
+    Runner runner = new Runner();
+    TestPrintProvider testPrintProvider = new TestPrintProvider();
+    TestInputProvider testInputProvider = new TestInputProvider(input);
+    InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+    try {
+      runner.run(inputStream, version, testPrintProvider, testInputProvider);
+
+      Iterator<String> messages = testPrintProvider.getMessages();
+      int i = 0;
+      while (messages.hasNext()) {
+        String message = messages.next();
+        if (!Objects.equals(output.get(i) + "\n", message)) {
+          return "fail";
+        }
+        i++;
+      }
+
+      return "success";
+
+    } catch (IOException e) {
+      return "fail";
     }
   }
 }
