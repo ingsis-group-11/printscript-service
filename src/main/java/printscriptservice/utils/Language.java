@@ -14,5 +14,6 @@ public interface Language {
 
   public String format(String code, String version);
 
-  public String test (String content, String language, String version, List<String> input, List<String> output);
+  public String test(
+      String content, String language, String version, List<String> input, List<String> output);
 }

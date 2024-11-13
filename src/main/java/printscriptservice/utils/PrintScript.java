@@ -9,13 +9,11 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import printscriptservice.redis.lint.LintProducer;
-import providers.inputprovider.InputProvider;
 import providers.inputprovider.TestInputProvider;
 import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;
@@ -157,7 +155,8 @@ public class PrintScript implements Language {
   }
 
   @Override
-  public String test(String content, String language, String version, List<String> input, List<String> output) {
+  public String test(
+      String content, String language, String version, List<String> input, List<String> output) {
     if (version == null) {
       version = "1.1";
     }
@@ -172,7 +171,7 @@ public class PrintScript implements Language {
       int i = 0;
       while (messages.hasNext()) {
         String message = messages.next();
-        if (!Objects.equals(output.get(i) + "\n" , message)) {
+        if (!Objects.equals(output.get(i) + "\n", message)) {
           return "fail";
         }
         i++;
