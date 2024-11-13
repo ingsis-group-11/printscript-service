@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import printscriptservice.service.ExecuteService;
-import printscriptservice.webservice.snippet.SnippetManager;
 
 @RestController
 @RequestMapping("/api/run")
@@ -15,7 +14,7 @@ public class ExecuteController {
   private final ExecuteService executeService;
 
   @Autowired
-  public ExecuteController(ExecuteService executeService, SnippetManager snippetManager) {
+  public ExecuteController(ExecuteService executeService) {
     this.executeService = executeService;
   }
 
