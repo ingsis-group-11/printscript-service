@@ -59,8 +59,15 @@ public class PrintScript implements Language {
     }
     ValidationRunner runner = new ValidationRunner();
     InputStream inputStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+    TestInputProvider inputProvider =
+        new TestInputProvider(
+            List.of(
+                "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+                "", "", "", "", "", "", "", "", ""));
     try {
-      runner.validate(inputStream, version);
+      runner.validate(inputStream, version, inputProvider);
     } catch (IOException e) {
       throw new RuntimeException("I/O error during compilation: " + e.getMessage());
     } catch (Exception e) {
@@ -163,10 +170,15 @@ public class PrintScript implements Language {
       int i = 0;
       while (messages.hasNext()) {
         String message = messages.next();
-        if (!Objects.equals(output.get(i) + "\n", message)) {
+        String expected = output.get(i) + "\n";
+        if (!Objects.equals(expected, message)) {
           return "fail";
         }
         i++;
+      }
+
+      if (i != output.size()) {
+        return "fail";
       }
 
       return "success";
