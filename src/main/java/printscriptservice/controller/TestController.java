@@ -20,8 +20,8 @@ public class TestController {
       @RequestParam("content") String content,
       @RequestParam("language") String language,
       @RequestParam("version") String version,
-      @RequestParam("inputs") List<String> input,
-      @RequestParam("outputs") List<String> output) {
+      @RequestParam("input") List<String> input,
+      @RequestParam("output") List<String> output) {
     return ResponseEntity.ok(testService.test(content, language, version, input, output));
   }
 }
