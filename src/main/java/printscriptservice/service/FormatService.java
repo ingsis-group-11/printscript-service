@@ -34,7 +34,8 @@ public class FormatService {
     return formattedContent;
   }
 
-  public String format(String content) {
+  public String format(String content, String userId) {
+    InputStream rules = assetManager.getRules(rulesContainer, userId);
     ObjectMapper objectMapper = new ObjectMapper();
     try {
       Map<String, String> map = objectMapper.readValue(content, Map.class);
@@ -43,6 +44,6 @@ public class FormatService {
       e.printStackTrace();
     }
 
-    return LanguageFactory.getLanguage("printscript").format(content, "1.1");
+    return LanguageFactory.getLanguage("printscript").format(content, rules, "1.1");
   }
 }
