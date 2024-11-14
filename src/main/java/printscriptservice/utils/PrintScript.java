@@ -1,5 +1,7 @@
 package printscriptservice.utils;
 
+import iterator.FileReaderIterator;
+import iterator.TokenIterator;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
+import parser.iterator.AstIterator;
 import printscriptservice.redis.lint.LintProducer;
 import providers.inputprovider.TestInputProvider;
 import providers.outputprovider.FileWriter;
@@ -20,7 +23,6 @@ import providers.printprovider.TestPrintProvider;
 import runner.FormatterRunner;
 import runner.LinterRunner;
 import runner.Runner;
-import runner.ValidationRunner;
 
 @Service
 public class PrintScript implements Language {
@@ -57,21 +59,17 @@ public class PrintScript implements Language {
     if (version == null) {
       version = "1.1";
     }
-    ValidationRunner runner = new ValidationRunner();
-    InputStream inputStream = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
-    TestInputProvider inputProvider =
-        new TestInputProvider(
-            List.of(
-                "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "", "", ""));
+    InputStream input = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
     try {
-      runner.validate(inputStream, version, inputProvider);
+      FileReaderIterator fileIterator = new FileReaderIterator(input);
+      TokenIterator tokens = new TokenIterator(fileIterator, version);
+      AstIterator nodes = new AstIterator(tokens, version);
+      while (nodes.hasNext()) {
+        nodes.next();
+      }
     } catch (IOException e) {
       throw new RuntimeException("I/O error during compilation: " + e.getMessage());
     } catch (Exception e) {
-      // Pass the specific validation error message to the exception
       throw new HttpServerErrorException(
           HttpStatus.INTERNAL_SERVER_ERROR, "Compilation error: " + e.getMessage());
     }
