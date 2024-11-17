@@ -44,5 +44,6 @@ redis:
             queue: "formatter-queue"
             group: "formatter-group"
 
-
-
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
