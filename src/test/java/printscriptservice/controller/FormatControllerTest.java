@@ -1,13 +1,12 @@
-package printscriptservice.controllers;
+package printscriptservice.controller;
 
-
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import printscriptservice.controller.FormatController;
 import printscriptservice.service.FormatService;
 import printscriptservice.utils.GlobalExceptionHandler;
 
@@ -29,25 +27,21 @@ public class FormatControllerTest {
 
   private MockMvc mockMvc;
 
-  @Mock
-  private FormatService formatService;
+  @Mock private FormatService formatService;
 
-  @InjectMocks
-  private FormatController formatController;
+  @InjectMocks private FormatController formatController;
 
-  @Mock
-  private Authentication authentication;
+  @Mock private Authentication authentication;
 
-  @Mock
-  private Jwt jwt;
+  @Mock private Jwt jwt;
 
-  @Mock
-  private SecurityContext securityContext;
+  @Mock private SecurityContext securityContext;
 
   @BeforeEach
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    mockMvc = MockMvcBuilders.standaloneSetup(formatController)
+    mockMvc =
+        MockMvcBuilders.standaloneSetup(formatController)
             .setControllerAdvice(new GlobalExceptionHandler())
             .build();
   }
@@ -65,11 +59,10 @@ public class FormatControllerTest {
 
     SecurityContextHolder.setContext(securityContext);
 
-    mockMvc.perform(post("/api/format")
-                    .content(content)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().string(expectedResponse));
+    mockMvc
+        .perform(post("/api/format").content(content).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string(expectedResponse));
 
     verify(formatService, times(1)).format(content, userId);
   }
@@ -87,11 +80,10 @@ public class FormatControllerTest {
 
     SecurityContextHolder.setContext(securityContext);
 
-    mockMvc.perform(post("/api/format")
-                    .content(content)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isInternalServerError())
-            .andExpect(content().string("A runtime error occurred: " + errorMessage));
+    mockMvc
+        .perform(post("/api/format").content(content).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError())
+        .andExpect(content().string("A runtime error occurred: " + errorMessage));
 
     verify(formatService, times(1)).format(content, userId);
   }
