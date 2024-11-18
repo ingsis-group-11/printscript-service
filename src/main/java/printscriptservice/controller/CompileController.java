@@ -25,9 +25,9 @@ public class CompileController {
       String result = compileService.compile(language, code, version);
       return ResponseEntity.ok(result);
     } catch (HttpServerErrorException ex) {
-      String statusText = ex.getStatusText();
-      System.out.println("Compilation error: " + statusText);
-      return ResponseEntity.status(ex.getStatusCode()).body(statusText);
+      String errorMessage = "Unexpected error: " + ex.getStatusCode();
+      System.out.println(errorMessage);
+      return ResponseEntity.status(ex.getStatusCode()).body(errorMessage);
     } catch (Exception ex) {
       String errorMessage = "Unexpected error: " + ex.getMessage();
       System.out.println(errorMessage);

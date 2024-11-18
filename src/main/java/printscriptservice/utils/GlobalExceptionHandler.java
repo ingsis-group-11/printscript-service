@@ -4,31 +4,41 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-  // Handle IllegalArgumentException globally
+  // Manejo global de IllegalArgumentException
   @ExceptionHandler(IllegalArgumentException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body("Invalid input: " + ex.getMessage());
   }
 
-  // Handle HttpServerErrorException globally
-  @ExceptionHandler(org.springframework.web.client.HttpServerErrorException.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ResponseEntity<String> handleHttpServerErrorException(
-      org.springframework.web.client.HttpServerErrorException ex) {
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+  // Manejo global de HttpServerErrorException
+  @ExceptionHandler(HttpServerErrorException.class)
+  public ResponseEntity<String> handleHttpServerErrorException(HttpServerErrorException ex) {
+    return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Server error: " + ex.getMessage());
   }
 
-  // Handle other exceptions globally
+  // Manejo global de otras excepciones
   @ExceptionHandler(Exception.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponseEntity<String> handleGeneralException(Exception ex) {
-    return new ResponseEntity<>(
-        "An error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Unexpected error: " + ex.getMessage());
+  }
+
+  // Manejo global de RuntimeException para capturar excepciones no previstas
+  @ExceptionHandler(RuntimeException.class)
+  public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+    return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("A runtime error occurred: " + ex.getMessage());
   }
 }
