@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import printscriptservice.dto.SnippetReceivedDto;
 import printscriptservice.redis.lint.LintProducer;
-import printscriptservice.utils.LanguageFactory;
 import printscriptservice.utils.LintResult;
+import printscriptservice.utils.language.LanguageFactory;
 import printscriptservice.webservice.asset.AssetManager;
 
 @Service

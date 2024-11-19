@@ -2,7 +2,7 @@ package printscriptservice.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import printscriptservice.utils.LanguageFactory;
+import printscriptservice.utils.language.LanguageFactory;
 
 @Service
 public class TestService {

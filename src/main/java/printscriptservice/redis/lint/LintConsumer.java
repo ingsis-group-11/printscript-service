@@ -36,12 +36,6 @@ public class LintConsumer extends RedisStreamConsumer<String> {
       SnippetReceivedDto snippetReceivedDto =
           objectMapper.readValue(jsonValue, SnippetReceivedDto.class);
 
-      // Now you can access each field of snippetReceivedDto
-      System.out.println("Asset ID: " + snippetReceivedDto.getAssetId());
-      System.out.println("Language: " + snippetReceivedDto.getLanguage());
-      System.out.println("Version: " + snippetReceivedDto.getVersion());
-      System.out.println("User ID: " + snippetReceivedDto.getUserId());
-
       analyzeService.analyze(snippetReceivedDto);
 
     } catch (Exception e) {

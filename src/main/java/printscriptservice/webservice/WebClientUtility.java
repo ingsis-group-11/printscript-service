@@ -59,10 +59,6 @@ public class WebClientUtility {
     return null;
   }
 
-  public <T> Mono<T> delete(String url, Class<T> responseEntityClass) {
-    return webClient.delete().uri(url).retrieve().bodyToMono(responseEntityClass);
-  }
-
   public <T> Mono<ResponseEntity<T>> putFlux(
       Flux<DataBuffer> dataBufferFlux, String url, Class<T> responseType) {
     return this.webClient

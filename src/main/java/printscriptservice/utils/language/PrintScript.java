@@ -1,4 +1,4 @@
-package printscriptservice.utils;
+package printscriptservice.utils.language;
 
 import iterator.FileReaderIterator;
 import iterator.TokenIterator;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import parser.iterator.AstIterator;
 import printscriptservice.redis.lint.LintProducer;
+import printscriptservice.utils.LintResult;
 import providers.inputprovider.TestInputProvider;
 import providers.outputprovider.FileWriter;
 import providers.printprovider.TestPrintProvider;

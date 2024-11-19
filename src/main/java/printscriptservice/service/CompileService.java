@@ -1,7 +1,7 @@
 package printscriptservice.service;
 
 import org.springframework.stereotype.Service;
-import printscriptservice.utils.LanguageFactory;
+import printscriptservice.utils.language.LanguageFactory;
 
 @Service
 public class CompileService {

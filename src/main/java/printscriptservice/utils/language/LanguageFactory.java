@@ -1,4 +1,4 @@
-package printscriptservice.utils;
+package printscriptservice.utils.language;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

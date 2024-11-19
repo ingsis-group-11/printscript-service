@@ -1,4 +1,4 @@
-package printscriptservice.utils;
+package printscriptservice.utils.language;
 
 import java.io.InputStream;
 import java.util.List;
