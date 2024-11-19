@@ -13,14 +13,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.HttpServerErrorException;
 import printscriptservice.service.CompileService;
 import printscriptservice.utils.GlobalExceptionHandler;
 
+@ActiveProfiles("test")
+@SpringBootTest
 public class CompileControllerTest {
 
   private MockMvc mockMvc;
